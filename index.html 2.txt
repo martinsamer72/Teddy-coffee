@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ملفات المخدومين">
+<title>ملفات المخدومين</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap');
+
+  :root {
+    --navy: #1a2744;
+    --navy-light: #243560;
+    --navy-mid: #2e4080;
+    --accent: #4f8ef7;
+    --accent-soft: #3a6fd8;
+    --gold: #f5c842;
+    --green: #22c55e;
+    --green-bg: #dcfce7;
+    --green-text: #15803d;
+    --red: #ef4444;
+    --red-bg: #fee2e2;
+    --red-text: #b91c1c;
+    --amber: #f59e0b;
+    --amber-bg: #fef3c7;
+    --amber-text: #92400e;
+    --white: #ffffff;
+    --muted: #94a3b8;
+    --border: rgba(255,255,255,0.1);
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-hint: #64748b;
+    --surface: #1e2d5a;
+    --surface2: #253570;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body, input, textarea, select, button {
+    font-family: 'Cairo', 'Tajawal', sans-serif !important;
+    font-weight: 700;
+    direction: rtl;
+    text-align: right;
+  }
+  input::placeholder, textarea::placeholder {
+    font-family: 'Cairo', 'Tajawal', sans-serif !important;
+    font-weight: 500;
+    color: var(--text-hint);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--navy);
+    color: var(--text-primary);
+    font-size: 16px;
+    overflow: hidden;
+  }
+
+  #app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* ── Status Bar ── */
+  .status-spacer { height: calc(var(--safe-top) + 12px); background: var(--navy); flex-shrink: 0; }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px 14px; flex-shrink: 0; direction: rtl;
+  }
+  .topbar-title { font-size: 19px; font-weight: 800; flex: 1; color: var(--white); }
+  .topbar-sub { font-size: 11px; color: var(--muted); margin-top: 1px; font-weight: 500; }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--white); font-size: 17px;
+    transition: background 0.15s; flex-shrink: 0;
+  }
+  .back-btn:active { background: var(--surface2); }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--white); flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .icon-btn:active { background: var(--surface2); }
+
+  /* ── Scroll ── */
+  .scroll-content {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 0 16px; -webkit-overflow-scrolling: touch;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+  .bottom-safe { height: calc(var(--safe-bottom) + 20px); flex-shrink: 0; }
+
+  /* ── Sync Bar ── */
+  .sync-bar {
+    padding: 0 18px 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #sync-indicator {
+    font-size: 11px; color: var(--muted);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .retry-btn {
+    font-size: 11px; color: var(--accent); background: none;
+    border: none; cursor: pointer; padding: 0; font-weight: 600;
+  }
+
+  /* ── Hero ── */
+  .profiles-hero {
+    background: linear-gradient(135deg, var(--navy-mid), var(--accent-soft), #1a5276, var(--accent));
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+    position: relative; overflow: hidden;
+  }
+  .profiles-hero::after {
+    content:''; position:absolute; right:-20px; top:-20px;
+    width:120px; height:120px; border-radius:50%;
+    background:rgba(255,255,255,0.05); pointer-events:none;
+  }
+
+  /* ── Filter chips ── */
+  .filter-bar {
+    display: flex; gap: 6px; margin-bottom: 12px;
+    overflow-x: auto; padding-bottom: 4px; flex-shrink: 0;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    border: 1px solid var(--card-border); background: var(--card-bg);
+    color: var(--muted); cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: all 0.15s; font-family: 'Cairo', 'Tajawal', sans-serif;
+  }
+  .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* ── Search ── */
+  .search-wrap { position: relative; margin-bottom: 14px; flex-shrink: 0; }
+  .search-input {
+    width: 100%; padding: 10px 40px 10px 14px;
+    border-radius: var(--radius-sm); background: var(--card-bg);
+    border: 1px solid var(--card-border); color: var(--white);
+    font-size: 14px; outline: none; transition: border-color 0.15s; direction: rtl;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+    opacity: 0.4; pointer-events: none;
+  }
+
+  /* ── Profile Grid ── */
+  .profile-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
+  }
+  .profile-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 14px 12px;
+    cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: fadeInUp 0.3s ease both;
+  }
+  .profile-card:active { transform: scale(0.96); background: var(--surface2); }
+  .pc-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .pc-name {
+    font-size: 12px; font-weight: 700; color: var(--white);
+    text-align: center; line-height: 1.3; word-break: break-word;
+  }
+  .pc-class {
+    font-size: 10px; color: var(--muted); text-align: center;
+    padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.06);
+  }
+  .pc-abs { font-size: 10px; font-weight: 700; }
+
+  /* ── Profile Detail ── */
+  .detail-hero {
+    background: linear-gradient(135deg, var(--navy-mid), var(--accent-soft));
+    border-radius: var(--radius); padding: 24px 20px; margin-bottom: 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    position: relative; overflow: hidden;
+    animation: fadeInScale 0.35s cubic-bezier(0.34,1.2,0.64,1) both;
+  }
+  .detail-hero::before {
+    content:''; position:absolute; right:-30px; bottom:-30px;
+    width:130px; height:130px; border-radius:50%;
+    background:rgba(255,255,255,0.05); pointer-events:none;
+  }
+  .detail-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; color: white;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both 0.1s;
+  }
+  .detail-name { font-size: 20px; font-weight: 800; color: white; text-align: center; }
+  .detail-class-label { font-size: 13px; color: rgba(255,255,255,0.65); }
+
+  /* ── Info Cards ── */
+  .info-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    animation: fadeInUp 0.3s ease both;
+  }
+  .info-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .info-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); margin-bottom: 3px;
+  }
+  .info-value { font-size: 13px; color: var(--white); line-height: 1.4; }
+  .info-value.empty { color: var(--text-hint); font-style: italic; font-size: 12px; }
+
+  /* ── Buttons ── */
+  .edit-btn {
+    width: 100%; padding: 13px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+    border: none; color: white; font-size: 14px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(79,142,247,0.35);
+    transition: opacity 0.15s; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .edit-btn:active { opacity: 0.85; }
+  .del-btn {
+    width: 100%; padding: 12px; border-radius: var(--radius);
+    background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .del-btn:active { background: rgba(239,68,68,0.22); }
+  .add-fab {
+    position: fixed; bottom: calc(28px + var(--safe-bottom)); left: 50%;
+    transform: translateX(-50%); width: calc(100% - 32px); max-width: 448px;
+    padding: 15px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+    border: none; color: white; font-size: 15px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 24px rgba(79,142,247,0.45);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: opacity 0.15s; z-index: 10;
+  }
+  .add-fab:active { opacity: 0.85; }
+
+  /* ── Birthday Banner ── */
+  .birthday-section {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 20px;
+  }
+  .birthday-header {
+    padding: 12px 16px 10px; font-size: 12px; color: var(--muted); font-weight: 600;
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px;
+  }
+  .birthday-row {
+    display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
+  }
+  .birthday-row:last-child { border-bottom: none; }
+  .birthday-row:active { background: var(--surface2); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 1000; padding: 16px; padding-bottom: calc(16px + var(--safe-bottom));
+  }
+  .modal-box {
+    background: var(--surface); border-radius: 24px 24px 20px 20px;
+    padding: 24px; width: 100%; max-width: 448px;
+    border: 1px solid var(--card-border);
+    animation: slideUp 0.28s cubic-bezier(0.34,1.3,0.64,1);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-box::-webkit-scrollbar { display: none; }
+  .modal-icon { font-size: 36px; margin-bottom: 12px; text-align: center; }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-align: center; }
+  .modal-body { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; text-align: center; }
+  .modal-btn {
+    width: 100%; padding: 13px; border-radius: var(--radius-sm);
+    border: none; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s; margin-bottom: 8px;
+  }
+  .modal-btn.primary { background: var(--accent); color: white; }
+  .modal-btn.danger { background: var(--red); color: white; }
+  .modal-btn.secondary { background: var(--card-bg); color: var(--muted); border: 1px solid var(--card-border); margin-bottom: 0; }
+  .modal-btn:active { opacity: 0.82; }
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;
+    display: block; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 11px 14px; border-radius: var(--radius-sm);
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    color: var(--white); font-size: 14px; outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select { appearance: none; cursor: pointer; }
+  .form-select option { background: var(--surface); color: var(--white); }
+  .form-textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
+
+  /* ── Section Label ── */
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    margin-bottom: 10px; margin-top: 4px; text-align: right; padding: 0;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center; padding: 40px 16px; color: var(--muted); font-size: 13px;
+    grid-column: 1/-1;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeInScale { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+  @keyframes bounceIn { 0%{opacity:0;transform:scale(0.3)} 50%{opacity:1;transform:scale(1.05)} 70%{transform:scale(0.92)} 100%{transform:scale(1)} }
+  @keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+  @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+  .ripple-effect {
+    position:absolute; border-radius:50%; background:rgba(255,255,255,0.2);
+    pointer-events:none; animation: ripple 0.5s ease-out forwards; transform:scale(0);
+  }
+  @keyframes ripple { 0%{transform:scale(0);opacity:0.5} 100%{transform:scale(2.5);opacity:0} }
+
+  /* ── Pending-sync badge ── */
+  .pending-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
+    display: inline-block; animation: pulse-dot 1.5s infinite;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ PROFILES LIST SCREEN ══ -->
+  <div id="screen-list" class="screen active">
+    <div class="status-spacer"></div>
+    <div class="topbar">
+      <div style="flex:1">
+        <div class="topbar-title">👤 ملفات المخدومين</div>
+        <div class="topbar-sub" id="count-label">جارٍ التحميل…</div>
+      </div>
+      <button class="icon-btn" onclick="openAddPerson()" title="إضافة مخدوم">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      </button>
+    </div>
+
+    <div class="sync-bar">
+      <div id="sync-indicator">
+        <span style="width:7px;height:7px;border-radius:50%;background:#64748b;display:inline-block"></span>
+        المزامنة السحابية
+      </div>
+      <button class="retry-btn" onclick="manualSync()" id="retry-btn" style="display:none">↻ إعادة المحاولة</button>
+    </div>
+
+    <div style="padding:0 16px;flex-shrink:0">
+      <!-- Class filter -->
+      <div class="filter-bar" id="filter-bar">
+        <button class="chip active" onclick="setFilter('all',this)">الكل</button>
+        <button class="chip" onclick="setFilter('c1',this)">١ ابتدائي</button>
+        <button class="chip" onclick="setFilter('c2',this)">٢ ابتدائي</button>
+        <button class="chip" onclick="setFilter('c3',this)">٣ ابتدائي</button>
+        <button class="chip" onclick="setFilter('c4',this)">٤ ابتدائي</button>
+        <button class="chip" onclick="setFilter('c5',this)">٥ ابتدائي</button>
+        <button class="chip" onclick="setFilter('c6',this)">٦ ابتدائي</button>
+      </div>
+      <!-- Search -->
+      <div class="search-wrap">
+        <input class="search-input" id="search-input" type="text" placeholder="🔍  ابحث عن مخدوم..." oninput="renderGrid()">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+
+    <div class="scroll-content">
+      <!-- Birthdays this month -->
+      <div id="birthdays-section"></div>
+
+      <div class="section-label" id="grid-label">المخدومين</div>
+      <div class="profile-grid" id="profiles-grid"></div>
+      <div style="height:80px"></div><!-- FAB clearance -->
+      <div class="bottom-safe"></div>
+    </div>
+
+    <button class="add-fab" onclick="openAddPerson()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      إضافة مخدوم جديد
+    </button>
+  </div>
+
+  <!-- ══ PROFILE DETAIL SCREEN ══ -->
+  <div id="screen-detail" class="screen">
+    <div class="status-spacer"></div>
+    <div class="topbar">
+      <button class="back-btn" onclick="backToList()">→</button>
+      <div style="flex:1">
+        <div class="topbar-title" id="detail-title">الملف الشخصي</div>
+        <div class="topbar-sub" id="detail-sub"></div>
+      </div>
+      <button class="icon-btn" onclick="openEditProfile(currentDetailCid, currentDetailName)" title="تعديل">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    </div>
+    <div class="scroll-content" id="detail-content"></div>
+  </div>
+
+</div>
+
+<!-- Modal container -->
+<div id="modal"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://ncgjtnceblmjkbwfhvsu.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZ2p0bmNiYmxtamtid2ZodnN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3Mjg1OTUsImV4cCI6MjA5MjMwNDU5NX0.X2IExv-xpAPo5k5vcByzNaVJibG64JZKhY-UTJgU4YA';
+
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...(opts.headers || {})
+    },
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) { const err = await res.text(); throw new Error(err); }
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CLASSES DATA (6 classes)
+// ═══════════════════════════════════════════════════════════════════
+const CLASSES = [
+  {
+    id: 'c1', name: 'أولى ابتدائي', sub: 'الصف الأول',
+    icon: '١', color: '#4f8ef7', bg: 'rgba(79,142,247,0.18)',
+    students: [
+      'مريم جورج','بيشوي ميلاد','مارينا سمير','كيرلس فادي',
+      'ماريان رامي','فيلوباتير يوسف','إيريني نبيل','مينا إسحاق',
+      'كريستين عاطف','أبانوب ماهر','ريجينا أنطوان','جرجس أيمن',
+      'سالي سعد','بولا نصر','مارك نادر'
+    ]
+  },
+  {
+    id: 'c2', name: 'تانية ابتدائي', sub: 'الصف الثاني',
+    icon: '٢', color: '#22c55e', bg: 'rgba(34,197,94,0.18)',
+    students: [
+      'ماريا ميخائيل','بيتر عزيز','ندى وليم','إبراهيم جميل',
+      'ستيفاني رفعت','يوسف سعيد','أميلي منصور','مارتينا طارق',
+      'ميناس هاني','فيكتوريا عصام','إريك مجدي','جولي صبري',
+      'مارك سامي','نانسي راعي','بيشوي رفيق'
+    ]
+  },
+  {
+    id: 'c3', name: 'تالتة ابتدائي', sub: 'الصف الثالث',
+    icon: '٣', color: '#f59e0b', bg: 'rgba(245,158,11,0.18)',
+    students: [
+      'كريم وليم','ريتا سمير','جرجس فريد','مارينا شنودة',
+      'بسنت ميخائيل','أندرو جرجس','مريم رمزي','أبانوب منصور',
+      'ستيفاني عادل','بيشوي نبيل','سارة لطفي','مارك أسامة',
+      'إيريني هاني','ماجد طارق','جولي رأفت'
+    ]
+  },
+  {
+    id: 'c4', name: 'رابعة ابتدائي', sub: 'الصف الرابع',
+    icon: '٤', color: '#a855f7', bg: 'rgba(168,85,247,0.18)',
+    students: [
+      'مينا عزيز','مريم أنطوان','بيتر سعيد','كيرلس ميخائيل',
+      'ريجينا يوسف','جرجس إبراهيم','ستيفاني عاطف','أبانوب رامي',
+      'فيكتوريا فادي','أندرو نبيل','ماريا طارق','بيشوي لطفي',
+      'إيريني سمير','مارك صبري','سالي وليم'
+    ]
+  },
+  {
+    id: 'c5', name: 'خامسة ابتدائي', sub: 'الصف الخامس',
+    icon: '٥', color: '#ec4899', bg: 'rgba(236,72,153,0.18)',
+    students: [
+      'أرميا منصور','مريم سعيد','بيشوي أيمن','كريستين عزيز',
+      'جرجس هاني','ماريا ماهر','أبانوب شنودة','ريتا مجدي',
+      'مارك إسحاق','فيلوباتير راعي','ندى أنطوان','ميناس رفيق',
+      'بولا جرجس','إبراهيم نادر','ستيفاني أسامة'
+    ]
+  },
+  {
+    id: 'c6', name: 'ستة ابتدائي', sub: 'الصف السادس',
+    icon: '٦', color: '#14b8a6', bg: 'rgba(20,184,166,0.18)',
+    students: [
+      'مارتينا وليم','جرجس سمير','ريجينا طارق','بيتر لطفي',
+      'أميلي ميخائيل','مينا عادل','سارة يوسف','أندرو رمزي',
+      'جولي منصور','كيرلس هاني','مريم فادي','بيشوي عاطف',
+      'إيريني صبري','مارك راعي','فيكتوريا إبراهيم'
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// AVATAR COLORS
+// ═══════════════════════════════════════════════════════════════════
+const AV_COLORS = [
+  '#4f8ef7','#22c55e','#f59e0b','#ec4899','#a855f7','#14b8a6',
+  '#f97316','#06b6d4','#84cc16','#ef4444','#8b5cf6','#10b981',
+  '#f43f5e','#3b82f6','#eab308','#6366f1'
+];
+function initials(n) {
+  return n.trim().split(/\s+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LOCAL STORAGE — profiles & extra/deleted students
+// ═══════════════════════════════════════════════════════════════════
+function loadProfiles()  { try { return JSON.parse(localStorage.getItem('student_profiles')||'{}'); } catch { return {}; } }
+function saveProfiles(p) { localStorage.setItem('student_profiles', JSON.stringify(p)); }
+
+function loadExtra()   { try { return JSON.parse(localStorage.getItem('extra_students')||'{}'); }   catch { return {}; } }
+function saveExtra(e)  { localStorage.setItem('extra_students', JSON.stringify(e)); }
+
+function loadDeleted()   { try { return JSON.parse(localStorage.getItem('deleted_students')||'[]'); } catch { return []; } }
+function saveDeleted(d)  { localStorage.setItem('deleted_students', JSON.stringify(d)); }
+
+// ═══════════════════════════════════════════════════════════════════
+// APPLY STORED EXTRA / DELETED STUDENTS ON BOOT
+// ═══════════════════════════════════════════════════════════════════
+function applyStoredStudents() {
+  const extra   = loadExtra();
+  const deleted = loadDeleted();
+  CLASSES.forEach(cls => {
+    deleted.forEach(key => {
+      const [dcid, dname] = key.split('::');
+      if (dcid === cls.id) {
+        const idx = cls.students.indexOf(dname);
+        if (idx !== -1) cls.students.splice(idx, 1);
+      }
+    });
+    (extra[cls.id] || []).forEach(name => {
+      if (!cls.students.includes(name)) cls.students.push(name);
+    });
+  });
+}
+applyStoredStudents();
+
+// ═══════════════════════════════════════════════════════════════════
+// PENDING QUEUE — retry failed profile saves
+// ═══════════════════════════════════════════════════════════════════
+function loadPending()  { try { return JSON.parse(localStorage.getItem('pending_profiles')||'[]'); } catch { return []; } }
+function savePending(q) { localStorage.setItem('pending_profiles', JSON.stringify(q)); }
+
+function queuePending(studentKey, profileData) {
+  const q = loadPending();
+  const idx = q.findIndex(x => x.key === studentKey);
+  const entry = { key: studentKey, profile: profileData, ts: Date.now() };
+  if (idx !== -1) q[idx] = entry; else q.push(entry);
+  savePending(q);
+}
+
+async function flushPending() {
+  const q = loadPending();
+  if (!q.length) return;
+  const remaining = [];
+  for (const item of q) {
+    try {
+      await sbFetch('student_profiles', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=minimal',
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: { student_key: item.key, profile: item.profile, updated_at: new Date().toISOString() }
+      });
+    } catch(e) { remaining.push(item); }
+  }
+  savePending(remaining);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PROFILE CRUD
+// ═══════════════════════════════════════════════════════════════════
+function profileKey(cid, name) { return cid + '::' + name; }
+function getProfile(cid, name) {
+  const p = loadProfiles();
+  return p[profileKey(cid, name)] || {};
+}
+
+async function setProfile(cid, name, data) {
+  // 1. Always save locally first (never lose data)
+  const p = loadProfiles();
+  const key = profileKey(cid, name);
+  p[key] = data;
+  saveProfiles(p);
+
+  // 2. Queue in case offline
+  queuePending(key, data);
+
+  // 3. Try cloud push
+  try {
+    await sbFetch('student_profiles', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: { student_key: key, profile: data, updated_at: new Date().toISOString() }
+    });
+    // Remove from pending since push succeeded
+    const q = loadPending();
+    const filtered = q.filter(x => x.key !== key);
+    savePending(filtered);
+    return true;
+  } catch(e) {
+    console.warn('Profile push failed, queued for retry:', e);
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CLOUD PULL
+// ═══════════════════════════════════════════════════════════════════
+async function pullProfilesFromCloud() {
+  try {
+    const rows = await sbFetch('student_profiles?select=*');
+    if (!rows || !rows.length) return;
+    const local = loadProfiles();
+    rows.forEach(row => {
+      // Cloud wins (latest updated_at), but never wipe a key that isn't in cloud
+      local[row.student_key] = row.profile;
+    });
+    saveProfiles(local);
+  } catch(e) { console.warn('Profile pull failed:', e); }
+}
+
+async function pullExtraStudentsFromCloud() {
+  try {
+    const rows = await sbFetch('extra_students?select=*');
+    if (!rows || !rows.length) return;
+    const extra   = loadExtra();
+    const deleted = loadDeleted();
+    rows.forEach(row => {
+      const cls = CLASSES.find(c => c.id === row.class_id);
+      if (!cls) return;
+      const key = row.class_id + '::' + row.name;
+      if (deleted.includes(key)) return;
+      if (!cls.students.includes(row.name)) cls.students.push(row.name);
+      if (!extra[row.class_id]) extra[row.class_id] = [];
+      if (!extra[row.class_id].includes(row.name)) extra[row.class_id].push(row.name);
+    });
+    saveExtra(extra);
+  } catch(e) { /* table may not exist */ }
+}
+
+async function pushExtraStudent(cid, name) {
+  try {
+    await sbFetch('extra_students', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates,return=minimal',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: { class_id: cid, name: name }
+    });
+  } catch(e) { console.warn('Extra student cloud push failed:', e); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ATTENDANCE DATA (read-only in this app; shared with main app)
+// ═══════════════════════════════════════════════════════════════════
+function loadAttData() { try { return JSON.parse(localStorage.getItem('att_data')||'{}'); } catch { return {}; } }
+function getAllAbsences(cid, name) {
+  const rec = loadAttData()[cid] || {};
+  return Object.values(rec).filter(day => day[name] === 'absent').length;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SYNC STATUS
+// ═══════════════════════════════════════════════════════════════════
+let syncStatus = 'idle';
+function setSyncStatus(s) {
+  syncStatus = s;
+  const el = document.getElementById('sync-indicator');
+  const retry = document.getElementById('retry-btn');
+  if (!el) return;
+  const states = {
+    syncing: { dot: '#f59e0b', text: 'جارٍ المزامنة…', anim: true },
+    ok:      { dot: '#22c55e', text: 'تمت المزامنة ✓', anim: false },
+    error:   { dot: '#ef4444', text: 'غير متصل',       anim: false },
+    idle:    { dot: '#64748b', text: 'المزامنة السحابية', anim: false }
+  };
+  const st = states[s] || states.idle;
+  const dotStyle = st.anim
+    ? 'width:7px;height:7px;border-radius:50%;background:' + st.dot + ';display:inline-block;animation:pulse-dot 1.5s infinite'
+    : 'width:7px;height:7px;border-radius:50%;background:' + st.dot + ';display:inline-block';
+  el.innerHTML = '<span style="' + dotStyle + '"></span>' + st.text;
+  if (retry) retry.style.display = (s === 'error') ? 'inline' : 'none';
+
+  // Show pending count if any
+  const pending = loadPending();
+  if (pending.length && s !== 'syncing') {
+    el.innerHTML += ' <span class="pending-dot" title="' + pending.length + ' تغييرات غير مرسلة" style="margin-right:4px"></span>';
+  }
+}
+
+async function manualSync() {
+  setSyncStatus('syncing');
+  try {
+    await flushPending();
+    await pullProfilesFromCloud();
+    await pullExtraStudentsFromCloud();
+    setSyncStatus('ok');
+    renderGrid();
+    renderBirthdays();
+    setTimeout(() => setSyncStatus('idle'), 3000);
+  } catch(e) {
+    setSyncStatus('error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let currentFilter = 'all';
+let currentDetailCid = null;
+let currentDetailName = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// SCREEN NAV
+// ═══════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function backToList() {
+  showScreen('screen-list');
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════════════════════
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER GRID
+// ═══════════════════════════════════════════════════════════════════
+function renderGrid() {
+  const grid = document.getElementById('profiles-grid');
+  const label = document.getElementById('grid-label');
+  const countLbl = document.getElementById('count-label');
+  if (!grid) return;
+
+  const query = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  const classes = currentFilter === 'all' ? CLASSES : CLASSES.filter(c => c.id === currentFilter);
+
+  grid.innerHTML = '';
+  let count = 0;
+
+  classes.forEach(cls => {
+    cls.students.forEach((name, i) => {
+      if (query && !name.toLowerCase().includes(query)) return;
+      const absences = getAllAbsences(cls.id, name);
+      const color = AV_COLORS[(cls.students.indexOf(name)) % AV_COLORS.length];
+      const absColor = absences >= 2 ? 'var(--red)' : absences === 1 ? 'var(--amber)' : 'var(--green)';
+      const absText = absences > 0 ? absences + ' غياب' : '✓ حسناً';
+
+      const card = document.createElement('div');
+      card.className = 'profile-card';
+      card.style.animationDelay = (count * 0.04) + 's';
+      card.onclick = () => openDetail(cls.id, name);
+      card.innerHTML =
+        '<div class="pc-avatar" style="background:' + color + '">' + initials(name) + '</div>' +
+        '<div class="pc-name">' + name + '</div>' +
+        '<div class="pc-class">' + cls.icon + ' ' + cls.sub + '</div>' +
+        '<div class="pc-abs" style="color:' + absColor + '">' + absText + '</div>';
+      grid.appendChild(card);
+      count++;
+    });
+  });
+
+  if (count === 0) {
+    grid.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:10px">🔍</div>لا توجد نتائج</div>';
+  }
+
+  const totalStudents = CLASSES.reduce((a, c) => a + c.students.length, 0);
+  countLbl.textContent = totalStudents + ' مخدوم · ' + CLASSES.length + ' فصول';
+  label.textContent = 'المخدومين (' + count + ')';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BIRTHDAYS THIS MONTH
+// ═══════════════════════════════════════════════════════════════════
+function renderBirthdays() {
+  const container = document.getElementById('birthdays-section');
+  if (!container) return;
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentDay = now.getDate();
+  const MONTHS_SHORT = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const MONTHS_FULL  = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+  function parseDob(dob) {
+    if (!dob) return null;
+    dob = dob.trim().toLowerCase();
+    let m = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return { month: parseInt(m[2])-1, day: parseInt(m[3]) };
+    m = dob.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m) return { month: parseInt(m[2])-1, day: parseInt(m[1]) };
+    for (let i=0; i<12; i++) {
+      if (dob.includes(MONTHS_SHORT[i]) || dob.includes(MONTHS_FULL[i])) {
+        const nums = dob.match(/\d+/g) || [];
+        const day = nums.find(n => parseInt(n)<=31 && parseInt(n)>=1) || 1;
+        return { month: i, day: parseInt(day) };
+      }
+    }
+    return null;
+  }
+
+  const bdays = [];
+  CLASSES.forEach(cls => {
+    cls.students.forEach((name, i) => {
+      const p = getProfile(cls.id, name);
+      const parsed = parseDob(p.dob);
+      if (parsed && parsed.month === currentMonth) {
+        bdays.push({
+          name, cid: cls.id, color: AV_COLORS[i % AV_COLORS.length],
+          day: parsed.day, isToday: parsed.day === currentDay, classIcon: cls.icon
+        });
+      }
+    });
+  });
+
+  if (!bdays.length) { container.innerHTML = ''; return; }
+  bdays.sort((a, b) => a.day - b.day);
+
+  const monthName = now.toLocaleString('ar-EG', { month: 'long' });
+  let html = '<div class="birthday-section">' +
+    '<div class="birthday-header"><span>🎉</span><span>' + bdays.length + ' مخدوم لديهم أعياد ميلاد في ' + monthName + '</span></div>';
+
+  bdays.forEach(b => {
+    const todayBadge = b.isToday
+      ? '<span style="background:var(--gold);color:#1a1a1a;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-right:6px">🎂 اليوم!</span>'
+      : '';
+    const shadowStyle = b.isToday ? ';box-shadow:0 0 0 3px var(--gold),0 0 12px rgba(245,200,66,0.4)' : '';
+    html +=
+      '<div class="birthday-row" onclick="openDetail(\'' + b.cid + '\',\'' + b.name.replace(/'/g,"\\'") + '\')">' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:' + b.color + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0' + shadowStyle + '">' + initials(b.name) + '</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:14px;font-weight:700;color:var(--white);display:flex;align-items:center;flex-wrap:wrap;gap:4px">' + b.name + todayBadge + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + b.classIcon + ' · ' + monthName + ' ' + b.day + '</div>' +
+        '</div>' +
+        '<span style="font-size:20px">' + (b.isToday ? '🎉' : '🎂') + '</span>' +
+      '</div>';
+  });
+  html += '</div><div style="height:6px"></div>';
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PROFILE DETAIL
+// ═══════════════════════════════════════════════════════════════════
+function openDetail(cid, name) {
+  currentDetailCid  = cid;
+  currentDetailName = name;
+
+  const cls      = CLASSES.find(c => c.id === cid);
+  const idx      = cls.students.indexOf(name);
+  const color    = AV_COLORS[idx % AV_COLORS.length];
+  const profile  = getProfile(cid, name);
+  const absences = getAllAbsences(cid, name);
+
+  document.getElementById('detail-title').textContent = name;
+  document.getElementById('detail-sub').textContent   = cls.name;
+
+  const val = (v, fb) => v
+    ? '<span class="info-value">' + v + '</span>'
+    : '<span class="info-value empty">' + fb + '</span>';
+
+  const absTag = absences === 0
+    ? '✅ لا غيابات'
+    : absences >= 2 ? '🚨 ' + absences + ' غياب' : '⚠️ ' + absences + ' غياب';
+
+  let html =
+    '<div style="padding:0 0 8px">' +
+    '<div class="detail-hero">' +
+      '<div class="detail-avatar" style="background:' + color + '">' + initials(name) + '</div>' +
+      '<div class="detail-name">' + name + '</div>' +
+      '<div class="detail-class-label">' + cls.name + '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:4px">' +
+        '<span style="font-size:11px;background:rgba(255,255,255,0.13);padding:4px 14px;border-radius:12px;color:rgba(255,255,255,0.85)">' + absTag + '</span>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="info-card">' +
+      '<div class="info-row"><div class="info-icon">🎂</div><div style="flex:1"><div class="info-label">تاريخ الميلاد</div>' + val(profile.dob,'غير محدد') + '</div></div>' +
+      '<div class="info-row"><div class="info-icon">📞</div><div style="flex:1"><div class="info-label">رقم الهاتف</div>' + val(profile.phone,'غير محدد') + '</div></div>' +
+      '<div class="info-row"><div class="info-icon">🏠</div><div style="flex:1"><div class="info-label">العنوان</div>' + val(profile.address,'غير محدد') + '</div></div>' +
+      '<div class="info-row"><div class="info-icon">🏫</div><div style="flex:1"><div class="info-label">الفصل</div><span class="info-value">' + cls.name + '</span></div></div>' +
+    '</div>' +
+
+    '<div class="info-card" style="animation-delay:0.07s">' +
+      '<div class="info-row"><div class="info-icon">👨‍👩‍👧</div><div style="flex:1"><div class="info-label">اسم ولي الأمر</div>' + val(profile.guardian,'غير محدد') + '</div></div>' +
+      '<div class="info-row"><div class="info-icon">📱</div><div style="flex:1"><div class="info-label">هاتف ولي الأمر</div>' + val(profile.guardianPhone,'غير محدد') + '</div></div>' +
+    '</div>' +
+
+    '<div class="info-card" style="animation-delay:0.13s">' +
+      '<div class="info-row"><div class="info-icon">⭐</div><div style="flex:1"><div class="info-label">العادات والسلوك</div>' + val(profile.habits,'لم تُسجَّل') + '</div></div>' +
+    '</div>' +
+
+    '<div class="info-card" style="animation-delay:0.19s">' +
+      '<div class="info-row" style="border:none;padding-bottom:0"><div class="info-icon">📝</div><div style="flex:1"><div class="info-label">ملاحظات</div>' + val(profile.notes,'لم تُضَف ملاحظات') + '</div></div>' +
+    '</div>' +
+
+    '<button class="edit-btn" onclick="openEditProfile(\'' + cid + '\',\'' + name.replace(/'/g,"\\'") + '\')">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+      'تعديل الملف' +
+    '</button>' +
+
+    '<button class="del-btn" onclick="confirmDelete(\'' + cid + '\',\'' + name.replace(/'/g,"\\'") + '\')">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+      'حذف المخدوم' +
+    '</button>' +
+    '<div class="bottom-safe"></div></div>';
+
+  document.getElementById('detail-content').innerHTML = html;
+  showScreen('screen-detail');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EDIT PROFILE MODAL
+// ═══════════════════════════════════════════════════════════════════
+function openEditProfile(cid, name) {
+  const profile = getProfile(cid, name);
+  let classOptions = '';
+  CLASSES.forEach(cls => {
+    classOptions += '<option value="' + cls.id + '"' + (cid === cls.id ? ' selected' : '') + '>' + cls.name + '</option>';
+  });
+
+  showModal(
+    '<div class="modal-icon">✏️</div>' +
+    '<div class="modal-title">تعديل الملف</div>' +
+    '<div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px">تعديل: <strong style="color:var(--accent)">' + name + '</strong></div>' +
+    '<div class="form-group"><label class="form-label">تاريخ الميلاد</label>' +
+      '<input class="form-input" id="ep-dob" type="text" placeholder="مثال: 15 يناير 2005 أو 2005-01-15" value="' + (profile.dob||'') + '"></div>' +
+    '<div class="form-group"><label class="form-label">رقم الهاتف</label>' +
+      '<input class="form-input" id="ep-phone" type="tel" placeholder="مثال: 01012345678" value="' + (profile.phone||'') + '"></div>' +
+    '<div class="form-group"><label class="form-label">العنوان</label>' +
+      '<input class="form-input" id="ep-address" type="text" placeholder="مثال: شارع النيل، المنيا" value="' + (profile.address||'') + '"></div>' +
+    '<div class="form-group"><label class="form-label">اسم ولي الأمر</label>' +
+      '<input class="form-input" id="ep-guardian" type="text" placeholder="مثال: أحمد محمد" value="' + (profile.guardian||'') + '"></div>' +
+    '<div class="form-group"><label class="form-label">هاتف ولي الأمر</label>' +
+      '<input class="form-input" id="ep-guardian-phone" type="tel" placeholder="مثال: 01098765432" value="' + (profile.guardianPhone||'') + '"></div>' +
+    '<div class="form-group"><label class="form-label">الفصل</label>' +
+      '<select class="form-select" id="ep-class">' + classOptions + '</select></div>' +
+    '<div class="form-group"><label class="form-label">العادات والسلوك</label>' +
+      '<textarea class="form-textarea" id="ep-habits" placeholder="مثال: يشارك بفاعلية، يقرأ يومياً...">' + (profile.habits||'') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">ملاحظات</label>' +
+      '<textarea class="form-textarea" id="ep-notes" placeholder="أي ملاحظات عن هذا المخدوم...">' + (profile.notes||'') + '</textarea></div>' +
+    '<button class="modal-btn primary" id="ep-save-btn" style="margin-bottom:8px">💾 حفظ الملف</button>' +
+    '<button class="modal-btn secondary" id="ep-cancel-btn">إلغاء</button>'
+  );
+
+  document.getElementById('ep-save-btn').addEventListener('click', async function() {
+    const btn = this;
+    btn.textContent = '⏳ جارٍ الحفظ…';
+    btn.disabled = true;
+
+    const updated = {
+      dob:          document.getElementById('ep-dob').value.trim(),
+      phone:        document.getElementById('ep-phone').value.trim(),
+      address:      document.getElementById('ep-address').value.trim(),
+      guardian:     document.getElementById('ep-guardian').value.trim(),
+      guardianPhone:document.getElementById('ep-guardian-phone').value.trim(),
+      classId:      document.getElementById('ep-class').value,
+      habits:       document.getElementById('ep-habits').value.trim(),
+      notes:        document.getElementById('ep-notes').value.trim()
+    };
+
+    const ok = await setProfile(cid, name, updated);
+    closeModal();
+    openDetail(cid, name);
+
+    // Show brief sync feedback
+    if (ok) {
+      setSyncStatus('ok');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    } else {
+      setSyncStatus('error');
+    }
+  });
+  document.getElementById('ep-cancel-btn').addEventListener('click', closeModal);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ADD STUDENT
+// ═══════════════════════════════════════════════════════════════════
+function openAddPerson() {
+  let classOptions = '';
+  CLASSES.forEach(cls => {
+    classOptions += '<option value="' + cls.id + '">' + cls.name + '</option>';
+  });
+
+  showModal(
+    '<div class="modal-icon">👤</div>' +
+    '<div class="modal-title">إضافة مخدوم جديد</div>' +
+    '<div class="form-group"><label class="form-label">اسم المخدوم</label>' +
+      '<input class="form-input" id="add-name" type="text" placeholder="مثال: مريم جورج" autocomplete="off"></div>' +
+    '<div class="form-group"><label class="form-label">الفصل</label>' +
+      '<select class="form-select" id="add-class">' + classOptions + '</select></div>' +
+    '<button class="modal-btn primary" id="add-confirm-btn" style="margin-bottom:8px">إضافة المخدوم</button>' +
+    '<button class="modal-btn secondary" id="add-cancel-btn">إلغاء</button>'
+  );
+
+  setTimeout(() => { const el = document.getElementById('add-name'); if (el) el.focus(); }, 150);
+  document.getElementById('add-confirm-btn').addEventListener('click', confirmAddPerson);
+  document.getElementById('add-cancel-btn').addEventListener('click', closeModal);
+}
+
+async function confirmAddPerson() {
+  const nameEl  = document.getElementById('add-name');
+  const classEl = document.getElementById('add-class');
+  if (!nameEl || !classEl) return;
+
+  const name = nameEl.value.trim();
+  const cid  = classEl.value;
+  if (!name) { nameEl.style.borderColor = 'var(--red)'; nameEl.focus(); return; }
+
+  const cls = CLASSES.find(c => c.id === cid);
+  if (cls.students.includes(name)) {
+    closeModal();
+    showModal(
+      '<div class="modal-icon">⚠️</div>' +
+      '<div class="modal-title">موجود مسبقاً</div>' +
+      '<div class="modal-body">' + name + ' موجود بالفعل في ' + cls.name + '</div>' +
+      '<button class="modal-btn primary" id="dup-ok">حسناً</button>'
+    );
+    document.getElementById('dup-ok').addEventListener('click', closeModal);
+    return;
+  }
+
+  // Add locally
+  cls.students.push(name);
+  const extra = loadExtra();
+  if (!extra[cid]) extra[cid] = [];
+  if (!extra[cid].includes(name)) extra[cid].push(name);
+  saveExtra(extra);
+
+  // Remove from deleted if re-adding
+  const deleted = loadDeleted();
+  const key = cid + '::' + name;
+  const di = deleted.indexOf(key);
+  if (di !== -1) { deleted.splice(di, 1); saveDeleted(deleted); }
+
+  // Push to cloud
+  pushExtraStudent(cid, name);
+
+  closeModal();
+  showModal(
+    '<div class="modal-icon">✅</div>' +
+    '<div class="modal-title">تمت الإضافة</div>' +
+    '<div class="modal-body"><strong style="color:white">' + name + '</strong> تمت إضافته إلى <strong style="color:white">' + cls.name + '</strong></div>' +
+    '<button class="modal-btn primary" id="added-ok">تم</button>'
+  );
+  document.getElementById('added-ok').addEventListener('click', function() {
+    closeModal();
+    renderGrid();
+    renderBirthdays();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DELETE STUDENT
+// ═══════════════════════════════════════════════════════════════════
+function confirmDelete(cid, name) {
+  const cls = CLASSES.find(c => c.id === cid);
+  showModal(
+    '<div class="modal-icon">🗑️</div>' +
+    '<div class="modal-title">حذف المخدوم؟</div>' +
+    '<div class="modal-body">سيتم حذف <strong style="color:white">' + name + '</strong> من <strong style="color:white">' + cls.name + '</strong> نهائياً.<br><br>' +
+    '<span style="color:var(--red);font-size:12px">⚠️ سيظل سجل الحضور محفوظاً لكنه لن يظهر في القوائم.</span></div>' +
+    '<button class="modal-btn danger" id="del-confirm" style="margin-bottom:8px">🗑️ نعم، احذف المخدوم</button>' +
+    '<button class="modal-btn secondary" id="del-cancel">إلغاء</button>'
+  );
+  document.getElementById('del-confirm').addEventListener('click', () => doDelete(cid, name));
+  document.getElementById('del-cancel').addEventListener('click', closeModal);
+}
+
+async function doDelete(cid, name) {
+  const cls = CLASSES.find(c => c.id === cid);
+
+  // Remove from memory
+  const idx = cls.students.indexOf(name);
+  if (idx !== -1) cls.students.splice(idx, 1);
+
+  // Remove from extra
+  const extra = loadExtra();
+  if (extra[cid]) {
+    const ei = extra[cid].indexOf(name);
+    if (ei !== -1) extra[cid].splice(ei, 1);
+    saveExtra(extra);
+  }
+
+  // Add to deleted
+  const deleted = loadDeleted();
+  const key = cid + '::' + name;
+  if (!deleted.includes(key)) { deleted.push(key); saveDeleted(deleted); }
+
+  // Cloud delete
+  try {
+    await sbFetch('extra_students?class_id=eq.' + encodeURIComponent(cid) + '&name=eq.' + encodeURIComponent(name), {
+      method: 'DELETE', headers: { 'Prefer': 'return=minimal' }
+    });
+  } catch(e) { console.warn('Cloud delete failed:', e); }
+
+  closeModal();
+  showModal(
+    '<div class="modal-icon">✅</div>' +
+    '<div class="modal-title">تم الحذف</div>' +
+    '<div class="modal-body"><strong style="color:white">' + name + '</strong> تمت إزالته من ' + cls.name + '</div>' +
+    '<button class="modal-btn primary" id="del-done">تم</button>'
+  );
+  document.getElementById('del-done').addEventListener('click', function() {
+    closeModal();
+    showScreen('screen-list');
+    renderGrid();
+    renderBirthdays();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function showModal(html) {
+  const m = document.getElementById('modal');
+  m.innerHTML = '<div class="modal-overlay" onclick="handleOverlayClick(event)"><div class="modal-box">' + html + '</div></div>';
+  m.style.display = 'block';
+}
+function closeModal() {
+  const m = document.getElementById('modal');
+  m.style.display = 'none';
+  m.innerHTML = '';
+}
+function handleOverlayClick(e) {
+  if (e.target.classList.contains('modal-overlay')) closeModal();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PERIODIC SYNC — every 60 seconds when visible
+// ═══════════════════════════════════════════════════════════════════
+let syncInterval = null;
+function startSyncPoll() {
+  if (syncInterval) return;
+  syncInterval = setInterval(async function() {
+    if (document.visibilityState !== 'visible') return;
+    await flushPending();
+    await pullProfilesFromCloud();
+    // Re-render grid if on list screen
+    if (document.getElementById('screen-list').classList.contains('active')) {
+      renderGrid();
+      renderBirthdays();
+    }
+  }, 60000);
+}
+
+// Flush pending when coming back online
+window.addEventListener('online', async function() {
+  setSyncStatus('syncing');
+  await flushPending();
+  await pullProfilesFromCloud();
+  renderGrid();
+  setSyncStatus('ok');
+  setTimeout(() => setSyncStatus('idle'), 3000);
+});
+
+// Warn when going offline
+window.addEventListener('offline', function() {
+  setSyncStatus('error');
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+async function init() {
+  renderGrid();
+  renderBirthdays();
+  setSyncStatus('syncing');
+
+  try {
+    // Flush any locally queued profiles first
+    await flushPending();
+    // Pull latest from cloud
+    await pullProfilesFromCloud();
+    await pullExtraStudentsFromCloud();
+    // Re-render with fresh data
+    renderGrid();
+    renderBirthdays();
+    setSyncStatus('ok');
+    setTimeout(() => setSyncStatus('idle'), 3000);
+  } catch(e) {
+    setSyncStatus('error');
+  }
+
+  startSyncPoll();
+}
+
+init();
+</script>
+</body>
+</html>
