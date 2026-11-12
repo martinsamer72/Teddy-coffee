@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teddy's Coffee | Demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=DM+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: concept storefront for a coffee shop. Notice bar, intro with open/closed status, sample menu, stamp-card strip, floating assistant, owner-alert preview. */
+:root {
+  color-scheme: light dark;
+  --bg: #eef0e6; --surface: #fbfbf6; --ink: #2b1d16; --muted: #66594f; --line: #d6dac8;
+  --accent: #55663f; --accent-ink: #ffffff; --brown: #7a4d30; --soft: #dfe4d0; --user: #55663f; --user-ink: #ffffff;
+  --ok: #1f7a3d; --ok-bg: #dcefdf; --closed: #8a3b2b; --closed-bg: #f4dfd9;
+  --font-brand: "Fredoka", "Segoe UI", sans-serif;
+  --font-display: "DM Sans", "Segoe UI", Tahoma, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1b1410; --surface: #261c16; --ink: #f0e8dc; --muted: #b5a898; --line: #3a2d24; --accent: #a5b98a; --accent-ink: #1a2410; --brown: #d8a982; --soft: #33291f; --user: #4c5d38; --ok: #7fd49a; --ok-bg: #173323; --closed: #f0a592; --closed-bg: #3a1e17; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notice { margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 6px 16px; background: var(--ink); color: var(--bg); font-size: 0.8rem; text-align: center; }
+.page { max-width: 980px; margin: 0 auto; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 16px; flex-wrap: wrap; }
+.brand { font-family: var(--font-brand); font-size: 1.5rem; letter-spacing: 0.2px; direction: ltr; }
+.status { font-size: 0.85rem; padding: 3px 12px; border-radius: 999px; font-weight: 600; }
+.status.open { background: var(--ok-bg); color: var(--ok); }
+.status.closed { background: var(--closed-bg); color: var(--closed); }
+.btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 10px 20px; font-weight: 600; }
+.btn.alt { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: center; padding-block: 32px 40px; }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.2rem, 7vw, 3.8rem); line-height: 1.15; margin: 0 0 14px; text-wrap: balance; }
+.hero p { color: var(--muted); margin: 0 0 22px; max-width: 46ch; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.info { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 14px; }
+.info h2 { font-family: var(--font-display); font-size: 1rem; margin: 0 0 4px; }
+.info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; font-variant-numeric: tabular-nums; }
+.info p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; padding-block: 32px; border-top: 1px solid var(--line); }
+.sec h2 { font-family: var(--font-display); font-size: 1.15rem; margin: 0 0 6px; }
+.sec p { margin: 0; color: var(--muted); }
+.menu { list-style: none; margin: 0; padding: 0; }
+.menu li { display: flex; justify-content: space-between; gap: 16px; padding-block: 11px; border-bottom: 1px dashed var(--line); }
+.menu li:first-child { padding-top: 0; }
+.menu span.n { font-weight: 600; }
+.menu small { color: var(--muted); margin-inline-start: 8px; direction: ltr; display: inline-block; }
+.menu span.p { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stamps { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; direction: ltr; }
+.stamp { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--brown); display: grid; place-items: center; font-size: 0.8rem; color: var(--brown); font-weight: 700; }
+.stamp.free { background: var(--brown); color: var(--bg); width: auto; padding-inline: 12px; border-radius: 999px; }
+footer { padding-block: 24px 120px; color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--line); }
+
+.fab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 12px 20px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+.panel { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); z-index: 20; width: min(380px, calc(100vw - 32px)); height: min(540px, 70vh); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+.panel[hidden] { display: none; }
+.ph { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.ph b { font-family: var(--font-display); }
+.ph small { color: var(--muted); display: block; line-height: 1.2; }
+.x { background: transparent; border: 0; font-size: 1.3rem; line-height: 1; padding: 4px 8px; color: var(--muted); }
+.log { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.95rem; }
+.msg.bot { background: var(--soft); align-self: flex-start; border-start-start-radius: 4px; }
+.msg.user { background: var(--user); color: var(--user-ink); align-self: flex-end; border-start-end-radius: 4px; }
+.msg.typing { color: var(--muted); letter-spacing: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; }
+.chip { background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 3px 12px; font-size: 0.85rem; }
+.chip:hover { background: var(--accent); color: var(--accent-ink); }
+.composer { display: flex; gap: 8px; padding: 10px 12px 6px; border-top: 1px solid var(--line); }
+.composer input { flex: 1; min-width: 0; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.composer button { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 8px 14px; font-weight: 600; }
+.consent { padding: 0 12px 10px; font-size: 0.72rem; color: var(--muted); }
+
+.alert { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 30; width: min(420px, calc(100vw - 32px)); background: var(--ink); color: var(--bg); border-radius: 14px; padding: 12px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); font-size: 0.9rem; white-space: pre-wrap; }
+.alert[hidden] { display: none; }
+.alert b { display: block; font-size: 0.72rem; letter-spacing: 0.05em; opacity: 0.7; margin-bottom: 4px; direction: ltr; text-align: left; }
+@media (max-width: 720px) { .hero, .sec { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+</style>
+</head>
+<body>
+<div class="notice">Demo prepared for Teddy's Coffee. Not the official website. The menu and prices are samples.</div>
+<div class="page">
+  <div class="bar">
+    <div class="brand">Teddy's Coffee</div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <section class="hero">
+    <div>
+      <h1>Your coffee is ready<br>before you arrive.</h1>
+      <p>Ask about the menu, book a table, or order your coffee for pickup. The assistant replies in seconds, even when the cafe is busy.</p>
+      <div class="actions">
+        <button class="btn" type="button" data-send="Book a table">Book a table</button>
+        <button class="btn alt" type="button" data-send="I want to order coffee for pickup">Order for pickup</button>
+      </div>
+    </div>
+    <div class="info">
+      <div>
+        <h2>Hours</h2>
+        <dl><dt>Saturday – Thursday</dt><dd>8:00 AM – 2:00 AM</dd><dt>Friday</dt><dd>10:00 AM – 2:00 AM</dd></dl>
+      </div>
+      <div>
+        <h2>Address</h2>
+        <p>University Towers, next to NBK Bank, Minya.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div><h2>Menu</h2><p>Sample menu. We will add your real menu and prices.</p></div>
+    <ul class="menu" id="menu"></ul>
+  </section>
+
+  <section class="sec">
+    <div><h2>Pats Card</h2><p>Collect 7 stamps and the 8th drink is on us (up to 100 EGP). The assistant can answer any question about the card.</p></div>
+    <div class="stamps" id="stamps" aria-hidden="true"></div>
+  </section>
+
+  <footer>Concept demo made to show to Teddy's Coffee. The only real information in it is the hours, the address, and the Pats card offer from their page. Everything else is sample content.</footer>
+
+  <button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="panel">Ask or book</button>
+  <div class="panel" id="panel" hidden role="dialog" aria-label="Cafe assistant">
+    <div class="ph"><div><b>Teddy's Assistant</b><small>Automated assistant, replies in seconds</small></div><button class="x" id="close" type="button" aria-label="Close">×</button></div>
+    <div class="log" id="log" role="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form class="composer" id="form" autocomplete="off">
+      <input id="msg" type="text" maxlength="300" placeholder="Type your message" aria-label="Your message">
+      <button type="submit">Send</button>
+    </form>
+    <div class="consent">By sending your details, you agree we use your name and number only to confirm your booking or order.</div>
+  </div>
+  <div class="alert" id="alert" hidden role="status"></div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var AR = "٠١٢٣٤٥٦٧٨٩";
+  function norm(s) {
+    return String(s).toLowerCase().replace(/[\u2018\u2019]/g, "'")
+      .replace(/[٠-٩]/g, function (d) { return AR.indexOf(d); }).trim();
+  }
+  function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  // Whole-word match at the start; short words (3 letters or less) must match the whole word.
+  function has(t, w) {
+    return w.some(function (x) {
+      var k = norm(x);
+      return new RegExp("(^|[^a-z0-9])" + esc(k) + (k.length <= 3 ? "($|[^a-z0-9])" : "")).test(t);
+    });
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  var ITEMS = [
+    { name: "Espresso", price: 55, k: ["espresso"] },
+    { name: "Americano", price: 60, k: ["americano"] },
+    { name: "Latte", price: 85, k: ["latte"] },
+    { name: "Iced Spanish Latte", price: 95, k: ["spanish"] },
+    { name: "Matcha Latte", price: 110, k: ["matcha"] },
+    { name: "Cold Brew", price: 90, k: ["cold brew"] }
+  ];
+  var MENU = ["Book a table", "Order for pickup", "Menu", "Hours", "Pats Card"];
+  var TIMES = ["4:00 PM", "6:00 PM", "8:00 PM", "10:00 PM"];
+  var WHEN = ["Now", "In 30 minutes", "In 1 hour"];
+  var INJ = ["ignore", "instruction", "system prompt", "prompt", "jailbreak", "developer mode", "pretend", "act as", "role play", "roleplay"];
+
+  // Header status, Cairo time. Closes 2 AM every day. Opens 8 AM, Friday 10 AM.
+  function setStatus() {
+    var p = new Intl.DateTimeFormat("en-US", { timeZone: "Africa/Cairo", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
+    var get = function (t) { return p.filter(function (x) { return x.type === t; })[0].value; };
+    var mins = (parseInt(get("hour"), 10) % 24) * 60 + parseInt(get("minute"), 10);
+    var opens = get("weekday") === "Fri" ? 600 : 480;
+    var open = mins < 120 || mins >= opens;
+    var s = $("status"); s.className = "status " + (open ? "open" : "closed"); s.textContent = open ? "Open now" : "Closed now, opens at " + (opens === 600 ? "10 AM" : "8 AM");
+  }
+  setStatus();
+
+  ITEMS.forEach(function (i) {
+    var li = el("li"), n = el("span", "n", i.name);
+    li.appendChild(n); li.appendChild(el("span", "p", i.price + " EGP")); $("menu").appendChild(li);
+  });
+  for (var k = 1; k <= 7; k++) $("stamps").appendChild(el("span", "stamp", String(k)));
+  $("stamps").appendChild(el("span", "stamp free", "The 8th is on us"));
+
+  function days() {
+    var out = [], d = new Date();
+    for (var i = 0; i < 3; i++) { out.push(d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })); d.setDate(d.getDate() + 1); }
+    return out;
+  }
+  function pick(opts, t) {
+    var n = parseInt(t, 10);
+    if (n >= 1 && n <= opts.length && String(n) === t) return opts[n - 1];
+    return opts.filter(function (o) { var l = norm(o); return l.indexOf(t) !== -1 || t.indexOf(l) !== -1; })[0] || null;
+  }
+  // Best match wins: the longest matching keyword (so "spanish latte" is the Spanish Latte, not plain Latte).
+  function itemIn(t) {
+    var best = null, len = 0;
+    ITEMS.forEach(function (i) { i.k.forEach(function (w) { if (has(t, [w]) && w.length > len) { best = i; len = w.length; } }); });
+    return best;
+  }
+  function validPhone(t) { var p = t.replace(/[\s-]/g, ""); return /^01[0125]\d{8}$/.test(p) ? p : null; }
+  function people(n) { return n + (n === "1" ? " person" : " people"); }
+
+  var st = { step: null, d: {}, list: null }, chain = Promise.resolve(), started = false, alertTimer = null;
+  function bubble(kind, text) { var b = el("div", "msg " + kind, text); $("log").appendChild(b); $("log").scrollTop = $("log").scrollHeight; return b; }
+  function setChips(list) {
+    var c = $("chips"); c.textContent = "";
+    (list || []).forEach(function (label) { var b = el("button", "chip", label); b.type = "button"; b.addEventListener("click", function () { handle(label); }); c.appendChild(b); });
+  }
+  function reply(text, chips) {
+    chain = chain.then(function () {
+      return new Promise(function (res) {
+        setChips([]);
+        var ty = bubble("bot typing", "• • •");
+        setTimeout(function () { ty.remove(); bubble("bot", text); setChips(chips); res(); }, 450);
+      });
+    });
+  }
+  // Preview of the alert the owner receives. In the live version the Worker sends this to the owner's Telegram.
+  function notify(text) {
+    chain = chain.then(function () {
+      var a = $("alert"); a.textContent = ""; a.appendChild(el("b", "", "ALERT TO THE OWNER (PREVIEW)")); a.appendChild(document.createTextNode(text)); a.hidden = false;
+      clearTimeout(alertTimer); alertTimer = setTimeout(function () { a.hidden = true; }, 9000);
+    });
+  }
+
+  function handle(raw) {
+    var text = String(raw).trim();
+    if (!text) return;
+    openChat();
+    bubble("user", text);
+    var t = norm(text);
+    if (has(t, INJ)) { reply("I'm Teddy's assistant. I only help with bookings, orders, and questions about the cafe, so I can't do that. How can I help?", MENU); return; }
+
+    if (st.step === "hphone") {
+      var hp = validPhone(t);
+      if (hp) { st.step = null; notify("Needs a reply from the cafe\nQuestion: " + st.q + "\nMobile: " + hp); reply("Got it. Someone from the cafe will call you on " + hp + ".", MENU); return; }
+      if (has(t, ["no", "no thanks", "thanks", "thank you", "that's all", "never mind", "nevermind", "i'm good"])) { st.step = null; reply("No problem.", MENU); return; }
+      st.step = null;
+    }
+    if (st.step) {
+      if (has(t, ["cancel", "stop", "never mind", "nevermind"])) { st.step = null; reply("Okay, cancelled. Let me know if you need anything else.", MENU); return; }
+      var d = st.d;
+      if (st.step === "people") {
+        var pp = pick(["1", "2", "3", "4", "5", "6", "7+"], t);
+        if (!pp) { reply("How many people?", ["2", "3", "4", "5", "6", "7+"]); return; }
+        d.people = pp; st.list = days(); st.step = "day"; reply("Which day would you like to come?", st.list);
+      } else if (st.step === "day") {
+        var dy = pick(st.list, t);
+        if (!dy) { reply("Please choose a day from the options below.", st.list); return; }
+        d.day = dy; st.step = "time"; reply("What time?", TIMES);
+      } else if (st.step === "time") {
+        var tm = pick(TIMES, t);
+        if (!tm) { reply("Please choose a time from the options below.", TIMES); return; }
+        d.time = tm; st.step = "name"; reply("What name should the booking be under?");
+      } else if (st.step === "name") {
+        if (text.length < 2 || /\d/.test(text)) { reply("Please type the name in letters."); return; }
+        d.name = text.slice(0, 40); st.step = "phone"; reply("What's your mobile number, " + d.name + "?");
+      } else if (st.step === "phone") {
+        var ph = validPhone(t);
+        if (!ph) { reply("That number doesn't look right. Please type an 11-digit Egyptian mobile number, like 01012345678."); return; }
+        d.phone = ph;
+        if (d.kind === "table") {
+          st.step = null;
+          notify("Table booking request\nName: " + d.name + "\nGuests: " + d.people + "\nDay: " + d.day + "\nTime: " + d.time + "\nMobile: " + ph + "\nConfirm with the customer.");
+          reply("Your booking request is recorded:\n" + people(d.people) + " · " + d.day + " · " + d.time + "\nName: " + d.name + "\nThe cafe will call you on " + ph + " to confirm.", MENU);
+        } else { st.step = "when"; reply("When would you like to pick it up?", WHEN); }
+      } else if (st.step === "item") {
+        var it = itemIn(t) || ITEMS[parseInt(t, 10) - 1];
+        if (!it) { reply("Please choose a drink from the options below.", ITEMS.map(function (i) { return i.name; })); return; }
+        d.item = it; st.step = "name"; reply("Great, " + it.name + " (" + it.price + " EGP). What name should the order be under?");
+      } else if (st.step === "when") {
+        var w = pick(WHEN, t);
+        if (!w) { reply("Please choose a time from the options below.", WHEN); return; }
+        st.step = null;
+        notify("New pickup order\nDrink: " + d.item.name + " (" + d.item.price + " EGP)\nName: " + d.name + "\nPickup: " + w + "\nMobile: " + d.phone + "\nPay on pickup.");
+        reply("Your order is recorded:\n" + d.item.name + " · " + d.item.price + " EGP\nPickup: " + w + " at the cafe\nPay on pickup. The cafe will confirm with you on " + d.phone + ".", MENU);
+      }
+      return;
+    }
+
+    var it2 = itemIn(t);
+    if (has(t, ["table", "book", "booking", "reserve", "reservation"])) { st.d = { kind: "table" }; st.step = "people"; reply("Sure, I'll book you a table. How many people?", ["2", "3", "4", "5", "6", "7+"]); }
+    else if (has(t, ["order", "pickup", "pick up", "pick-up", "buy", "takeaway", "take away"])) { st.d = { kind: "order" }; st.step = "item"; reply("Which drink would you like?\n" + ITEMS.map(function (i, n) { return (n + 1) + ". " + i.name + " (" + i.price + " EGP)"; }).join("\n"), ITEMS.map(function (i) { return i.name; })); }
+    else if (has(t, ["delivery", "deliver"])) { st.q = text; st.step = "hphone"; reply("Delivery will be checked with the cafe. If you want someone to call you, type your mobile number.", ["No thanks"]); }
+    else if (has(t, ["card", "stamp", "pats", "points", "offer", "reward", "loyalty"])) reply("Pats Card: you get a stamp on every drink. Collect 7 stamps and the 8th drink is on us (up to 100 EGP).", ["Order for pickup"]);
+    else if (has(t, ["how much", "price", "prices", "cost", "menu"]) || it2) {
+      reply(it2 && !has(t, ["menu"]) ? it2.name + ": " + it2.price + " EGP." : "Menu (sample):\n" + ITEMS.map(function (i) { return "• " + i.name + ": " + i.price + " EGP"; }).join("\n"), ["Order for pickup", "Book a table"]);
+    }
+    else if (has(t, ["hours", "open", "close", "closing", "what time", "schedule", "working"])) reply("We're open Saturday to Thursday from 8 AM to 2 AM, and Friday from 10 AM to 2 AM.", ["Book a table"]);
+    else if (has(t, ["where", "address", "location", "directions", "find you", "get there"])) reply("University Towers, next to NBK Bank, Minya.", ["Book a table"]);
+    else if (has(t, ["thanks", "thank you", "thx", "appreciate"])) reply("You're welcome, see you soon ☕", MENU);
+    else if (has(t, ["hello", "hi", "hey", "good morning", "good evening", "good afternoon", "how are you"])) reply("Welcome to Teddy's ☕ I can help with bookings, orders, the menu, and hours.", MENU);
+    else { st.q = text; st.step = "hphone"; reply("I'm not sure about that, so I'll ask the cafe. If you want someone to call you, type your mobile number.", ["No thanks"]); }
+  }
+
+  function openChat() {
+    $("panel").hidden = false; $("fab").setAttribute("aria-expanded", "true");
+    if (!started) { started = true; reply("Welcome to Teddy's ☕ I'm the automated assistant. I can book you a table, record a pickup order, or answer questions about the menu, hours, and address.", MENU); }
+  }
+  function closeChat() { $("panel").hidden = true; $("fab").setAttribute("aria-expanded", "false"); }
+  $("fab").addEventListener("click", function () { if ($("panel").hidden) { openChat(); $("msg").focus(); } else closeChat(); });
+  $("close").addEventListener("click", closeChat);
+  $("form").addEventListener("submit", function (e) { e.preventDefault(); var i = $("msg"), v = i.value; i.value = ""; handle(v); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-send]"), function (b) { b.addEventListener("click", function () { handle(b.getAttribute("data-send")); }); });
+})();
+</script>
+</body>
+</html>
